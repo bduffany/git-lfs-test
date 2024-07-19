@@ -9,5 +9,6 @@ if ! command -v git-lfs &>/dev/null; then
   sudo apt install -y git-lfs
 fi
 
+sudo git lfs install || true
 git lfs pull
 
