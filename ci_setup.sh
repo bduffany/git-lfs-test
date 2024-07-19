@@ -12,3 +12,6 @@ fi
 git lfs install || true
 git lfs pull
 
+git --version
+git-lfs --version
+
