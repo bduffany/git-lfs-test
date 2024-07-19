@@ -11,19 +11,25 @@ git add big/
 git commit -m "Add another big file"
 git lfs push --all origin
 git push
-echo 'Calling ExecuteWorkflow...'
-IID=$(
-  curl -fsSL \
+REQUEST='{
+  "repo_url": "'"$(git remote get-url origin)"'",
+  "branch": "'"$(git branch --show-current)"'",
+  "commit_sha": "'"$(git rev-parse HEAD)"'",
+  "action_names": ["Test"],
+  "env": {
+    "GIT_TRACE": "1",
+    "GIT_CURL_VERBOSE": "1",
+    "GIT_TRANSFER_TRACE": "1"
+  }
+}'
+echo 'ExecuteWorkflow' "$REQUEST"
+RESPONSE=$(
+  curl --fail-with-body -sL \
   -H "x-buildbuddy-api-key: $API_KEY" \
   -H 'Content-Type: application/json' \
   "$API_URL/api/v1/ExecuteWorkflow" \
-  --data '{
-    "repo_url": "'"$(git remote get-url origin)"'",
-    "branch": "'"$(git branch --show-current)"'",
-    "commit_sha": "'"$(git rev-parse HEAD)"'"
-  }' | \
-  jq -r '.actionStatuses[].invocationId'
+  --data "$REQUEST" | tee /dev/stderr && echo >&2
 )
-echo "Workflow invocation ID: $IID"
+IID=$(echo "$RESPONSE" | jq -r '.actionStatuses[].invocationId')
 open "$API_URL/invocation/$IID"
 
