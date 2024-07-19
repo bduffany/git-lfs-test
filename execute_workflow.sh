@@ -24,5 +24,6 @@ IID=$(
   }' | \
   jq -r '.actionStatuses[].invocationId'
 )
+echo "Workflow invocation ID: $IID"
 open "$API_URL/invocation/$IID"
 
